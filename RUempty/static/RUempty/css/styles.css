@@ -1,0 +1,178 @@
+a, a:hover {
+	text-decoration: none !important;
+}
+
+.container {
+	padding-top: 20px;
+}
+/* Customize container */
+@media (min-width: 768px) {
+  .container {
+    max-width: 730px;
+  }
+}
+@media (min-width: 768px) {
+  .container {
+    width: 730px;
+  }
+}
+@media (min-width: 992px) {
+  .container {
+    width: 970px;
+  }
+}
+@media (min-width: 1200px) {
+  .container {
+    width: 1170px;
+  }
+}
+
+.select-row {
+	width: 80%;
+	max-width: 100%;
+	height: 100%;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+
+.lead {
+	text-align: center;
+	width: 100%;
+}
+
+.subhead h1 {
+    font-size: 54px;
+    color: #333;
+    font-weight: bold;
+}
+
+.jumbotron {
+	padding: 30px 15px;
+  margin-bottom: 30px;
+  color: inherit;
+  background-color: #eee;
+	text-align: center;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.jumbotron h1 {
+    margin-bottom: 9px;
+    font-weight: bold;
+    letter-spacing: -1px;
+    line-height: 1;
+}
+
+#submitQ {
+	padding: 6px 12px;
+	font-size: 18px;
+	border: 1px solid transparent;
+	background-color: #cc0000;
+}
+
+.navbar {
+    margin-bottom: 20px;
+}
+
+.content {
+    padding-top: 50px;
+}
+
+span.red {
+    color: #cc0000;
+}
+
+footer {
+    font-size: 16px;
+}
+
+input[type="text"] {
+    width: 300px;
+}
+
+#sniper-test {
+    margin: 10px;
+}
+
+ol li b {
+    display: block;
+}
+
+.form-control {
+	text-align: center;
+}
+
+/*.panel .panel-title {*/
+/*	color: #fff;*/
+/*}*/
+
+.panel-danger {
+	border-color: #cc0000 !important;
+}
+
+.panel-danger > .panel-heading {
+	background-color: #cc0000 !important;
+	border-color: #cc0000 !important;
+}
+
+.panel-success {
+	border-color: green !important;
+}
+
+.panel-success > .panel-heading {
+	background-color: green !important;
+	border-color: green !important;
+}
+
+#android-button {
+	text-align: center;
+	padding-top: 2%;
+}
+
+footer{
+	 text-align: center;
+}
+
+.btn[disabled]{
+	opacity: .3 !important;
+}
+
+
+.switch-open-occupied-button {
+  position: relative;
+  left: 43%;
+  font-size: x-small;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.display-class-button {
+  position: relative;
+  left: 43%;
+  width: 20px;
+  height: 20px;
+}
+
+.time-row {
+  display: grid;
+  grid-template-columns: 100% 0;
+  text-align: center;
+}
+
+.occupied-time-time {
+  display: inline;
+  width: 100%;
+}
+
+.occupied-time-class {
+  transition: all .2s ease-in-out;
+  height: 0;
+}
+
+.display-class-button {
+  display: inline;
+  position: relative;
+  left: -15px;
+  height: 30px;
+  width: 30px;
+}

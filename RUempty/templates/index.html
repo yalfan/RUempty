@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="jumbotron">
+		<form name="myForm" role="form" method="POST" action="/rooms">
+            {% csrf_token %}
+			<div class="form-group row align-items-center select-row">
+        		<p class="lead">Pick a day of the week</p>
+				{{ form.day }}
+			</div>
+            <div class="form-group row align-items-center select-row">
+                <p class="lead">Pick a campus</p>
+				{{ form.campus }}
+            </div>
+            <div class="form-group row align-items-center select-row">
+                <p class="lead">Pick a building</p>
+				{{ form.building }}
+            </div>
+	  		<button id="submitBtn" type="submit" class="btn btn-danger" disabled="disabled">Submit</button>
+		</form>
+        <br>
+        {% if user.is_superuser %}
+            <button id="update-db-button" class="btn btn-danger">Update DB!</button>
+        {% endif %}
+    </div>
+
+
+{% endblock %}
+
+{% block script %}
+    <script>
+        const csrfToken = '{{ csrf_token }}';
+    </script>
+    <script src="{% static 'RUempty/js/main.js' %}"></script>
+{% endblock %}

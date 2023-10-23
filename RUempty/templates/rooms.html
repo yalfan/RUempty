@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+
+{% load static %}
+
+{% block content %}
+    <div class="jumbotron">
+        <p>{{ day }} - {{ campus }} - {{ building }} </p>
+        <h5> These rooms are open/occupied at the times shown </h5>
+        {% for room, times in room_times.items %}
+            <div class="card text-center border-dark room-card room-{{ room }}">
+                <div class="card-header" style="line-height: 0;">
+                    <div class="switch-open-occupied-button {{ room }}">
+                        View Occupied Times</div>
+                    <h3 class="panel-title">{{ building }}-{{ room }}</h3>
+                </div>
+                <ul class="list-group times-list">
+                    {% if times.0|length == 0 %}
+                        <li class="list-group-item">Open all day!</li>
+                    {% else %}
+                        <li class="list-group-item open-time-item" style="display: block;"><b>Open times</b></li>
+                        <li class="list-group-item occupied-time-item" style="display: none;"><b>Occupied times</b></li>
+                    {% endif %}
+                    {% for time in times.1 %}
+                        <li class="list-group-item open-time-item" style="display: block;">{{ time }} </li>
+                    {% endfor %}
+
+                    {% for time in times.0 %}
+                        <li class="list-group-item occupied-time-item" style="display: none;">
+                            <div class="time-row">
+                                <div class="occupied-time-time" style="position: static; text-align: center; align-content: center;">{{ time }}</div>
+                                <button class="display-class-button"
+                                        style="background-image: url({% static 'RUempty/images/dropdown.png' %});
+                                        background-size: 30px 30px; background-color: transparent;
+                                        color: transparent; border: 0;"></button>
+                            </div>
+
+                            <div class="occupied-time-class" style="height: 0;">
+                                <hr style="display: none;">
+                                <p class="class-name" style="display: none;">Work in progress!</p>
+                                <p class="class-instructors" style="display: none;">This function is coming soon!</p>
+                            </div>
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+            </div>
+            <br>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+        const roomCourses = {{ room_courses|safe }};
+    </script>
+    <script src="{% static 'RUempty/js/rooms.js' %}"></script>
+{% endblock %}

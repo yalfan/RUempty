@@ -1,0 +1,44 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}RU Empty{% endblock %}</title>
+        <link rel="shortcut icon" type="image/x-icon" href="{% static 'RUempty/images/favicon.png' %}"/>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <!--<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>-->
+        <link href="{% static 'RUempty/css/styles.css' %}" rel="stylesheet">
+        {% block script %}
+        {% endblock %}
+    </head>
+
+  <body>
+  	<a href="https://github.com/adispen/ruEmpty"><img alt="Fork me on GitHub" style="position: absolute; top: 0; right: 0; border: 0;"></a>
+
+    <div class="container">
+
+{#        <a href="/static">#}
+        <a href="/">
+            <header class="subhead">
+                <h1 id="titleHeader">
+                    <span class="red"> RU</span>Empty
+                </h1>
+            </header>
+        </a>
+
+        {% block content %}{% endblock %}
+
+        <footer>
+            Questions or feedback? Send us an email at <a href="mailto:ruempty@rutgers.io">ruempty@rutgers.io</a>.<br>
+            RU Empty created by <a href="https://www.linkedin.com/in/jd7979">Jason Davis</a>. Website developed and maintained by <a href="http://github.com/adispen">Aedan Dispenza</a>. Domain provided by <a href="https://twitter.com/samgdf"> Sam Goldfield</a>.
+            <div id="android-button" ><p> For more features, check out the original Android App <br> <a href="https://play.google.com/store/apps/details?id=com.blankcanvassoftware.ruEmpty&utm_source=global_co&utm_medium=prtnr&utm_content=Mar2515&utm_campaign=PartBadge&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1"><img alt="Get it on Google Play" style="width: 30%" src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge-border.png" /></a> </p> </div>
+        </footer>
+              
+
+    </div> <!-- /container -->
+
+
+  </body>
+  <!--<script type="text/javascript" src="../static/RUempty/js/empty.js"></script>-->
+</html>
+
