@@ -48,7 +48,7 @@ function displayOpenOrOccupied(btn) {
 
 function displayOccupiedClass(btn) {
   // console.log(btn.parentNode);
-  let parent = btn.parentNode;
+  let parent = btn.parentNode.parentNode;
   if (btn.style.backgroundImage === "url(\"/static/RUempty/images/dropdown.png\")") {
     btn.style.backgroundImage = "url(\"/static/RUempty/images/slideup.png\")";
   }
@@ -78,11 +78,28 @@ function displayOccupiedClass(btn) {
 }
 
 function loadCourses() {
-  let rooms = document.querySelectorAll('.room-card');
-  console.log(roomCourses);
-  for (let course of roomCourses) {
-    console.log(course);
+  // console.log(roomCourses);
+  for (const property in roomCourses) {
+    let roomNumber = property.split(",")[0];
+    let startTime = property.split(",")[1].split(" -> ")[0]
+    let endTime = property.split(",")[1].split(" -> ")[1]
+    console.log(roomCourses[property]);
+    
+    let room = document.querySelector(`.room-${roomNumber}`);
+    let times = room.querySelectorAll('.occupied-time-time');
+    times.forEach(time => {
+      let sTime = time.textContent.split(" -> ")[0];
+      let eTime = time.textContent.split(" -> ")[1];
+      if (startTime === sTime && endTime === eTime) {
+        let information = time.parentNode.parentNode.querySelector('.occupied-time-class');
+        let className = information.querySelector('.class-name');
+        let instructors = information.querySelector('.class-instructors');
+        className.textContent = roomCourses[property][0];
+        instructors.textContent = "Instructor(s): " + roomCourses[property][1].join(" & ");
+      }
+    })
   }
+  // let rooms = document.querySelectorAll('.room-card');
   // rooms.forEach(room => {
   //   let roomNumber = room.classList[room.classList.length-1].split("-")[1];
   //   let times = room.querySelectorAll('.occupied-time-time');

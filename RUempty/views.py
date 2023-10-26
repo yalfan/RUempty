@@ -112,8 +112,6 @@ def rooms(request):
 
         start = StartTime.objects.get(time=datetime.time(8, 0))
         for time in meeting_times:
-            # print(time.section)
-            # print(time.__str__())
             instructors = list(time.section.instructors.all())
             instructors = [instructor.name for instructor in instructors]
 
@@ -131,10 +129,10 @@ def rooms(request):
                             datetime.datetime.combine(date.min, start.time_block.end_time.time)
             if time_diff > datetime.timedelta(0, 0, 0, 0, 30):
                 if type(start) == RUempty.models.StartTime:
-                    room_times[room.number][1].append(f"{start.stime} --> {time.time_block.start_time.stime}")
+                    room_times[room.number][1].append(f"{start.stime} -> {time.time_block.start_time.stime}")
                 else:
                     room_times[room.number][1].append(f"{start.time_block.end_time.stime}"
-                                                      f" --> {time.time_block.start_time.stime}")
+                                                      f" -> {time.time_block.start_time.stime}")
             start = time
         closing = EndTime.objects.get(time=datetime.time(23, 00))
         if len(meeting_times) > 0:
@@ -142,7 +140,7 @@ def rooms(request):
             time_diff = datetime.datetime.combine(date.min, closing.time) - \
                         datetime.datetime.combine(date.min, last_meeting_time.time_block.end_time.time)
             if time_diff > datetime.timedelta(0, 0, 0, 0, 30):
-                room_times[room.number][1].append(f"{last_meeting_time.time_block.end_time.stime} --> {closing.stime}")
+                room_times[room.number][1].append(f"{last_meeting_time.time_block.end_time.stime} -> {closing.stime}")
 
     return render(request, "rooms.html", {
         "campus": request.POST["campus"],

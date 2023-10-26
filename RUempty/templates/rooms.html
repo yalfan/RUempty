@@ -28,10 +28,13 @@
                         <li class="list-group-item occupied-time-item" style="display: none;">
                             <div class="time-row">
                                 <div class="occupied-time-time" style="position: static; text-align: center; align-content: center;">{{ time }}</div>
-                                <button class="display-class-button"
-                                        style="background-image: url({% static 'RUempty/images/dropdown.png' %});
+                                <div style="position: relative">
+                                    <button class="display-class-button"
+                                        style="position: absolute; background-image: url({% static 'RUempty/images/dropdown.png' %});
                                         background-size: 30px 30px; background-color: transparent;
                                         color: transparent; border: 0;"></button>
+                                </div>
+
                             </div>
 
                             <div class="occupied-time-class" style="height: 0;">
@@ -53,6 +56,7 @@
 {% block script %}
     <script type="text/javascript">
         const roomCourses = {{ room_courses|safe }};
+        const building = '{{ building|safe }}';
     </script>
     <script src="{% static 'RUempty/js/rooms.js' %}"></script>
 {% endblock %}
