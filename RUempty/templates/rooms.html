@@ -3,6 +3,7 @@
 {% load static %}
 
 {% block content %}
+    {{ room_times }}
     <div class="jumbotron">
         <p>{{ day }} - {{ campus }} - {{ building }} </p>
         <h5> These rooms are open/occupied at the times shown </h5>
@@ -20,10 +21,8 @@
                         <li class="list-group-item open-time-item" style="display: block;"><b>Open times</b></li>
                         <li class="list-group-item occupied-time-item" style="display: none;"><b>Occupied times</b></li>
                     {% endif %}
-                    {% for time in times.1 %}
-                        <li class="list-group-item open-time-item" style="display: block;">{{ time }} </li>
-                    {% endfor %}
 
+                    {# Adds all occupied times and hides them #}
                     {% for time in times.0 %}
                         <li class="list-group-item occupied-time-item" style="display: none;">
                             <div class="time-row">
@@ -43,7 +42,11 @@
                                 <p class="class-instructors" style="display: none;">This function is coming soon!</p>
                             </div>
                         </li>
+                    {% endfor %}
 
+                    {# Adds all open times and displays them #}
+                    {% for time in times.1 %}
+                        <li class="list-group-item open-time-item" style="display: block;">{{ time }} </li>
                     {% endfor %}
 
                 </ul>

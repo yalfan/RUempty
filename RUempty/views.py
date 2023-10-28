@@ -1,6 +1,7 @@
 import json
 import requests
-from datetime import datetime, date
+import datetime as dt
+from datetime import date, datetime
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -25,7 +26,7 @@ class SelectForm(forms.Form):
     """Defining form which will be rendered on the main page via WTForms."""
     dayChoices = [("Monday", 'Monday'), ("Tuesday", 'Tuesday'),
                   ("Wednesday", 'Wednesday'), ("Thursday", 'Thursday'),
-                  ("Friday", 'Friday'), ("Saturday", "Saturday"),]
+                  ("Friday", 'Friday'), ("Saturday", "Saturday"), ]
 
     # Initial choice set to prompt user to change the campus, which fires the
     # GET request which will get all buildings for that campus.
@@ -101,6 +102,7 @@ def rooms(request):
     building = request.POST["building"]
     day = days[request.POST["day"]]
     rooms = list(Room.objects.filter(building__name=building).filter(building__campus__name=campus))
+
     room_times = {}
     room_courses = {}
     for room in rooms:
@@ -108,39 +110,40 @@ def rooms(request):
                                                         room__building__name=building,
                                                         room=room, day=day))
         meeting_times.sort(key=lambda time: time.time_block.start_time.time)
+
+        # room_times[room #][0] = occupied times
+        # room_times[room #][1] = open times
         room_times[room.number] = [[], []]
 
-        start = StartTime.objects.get(time=datetime.time(8, 0))
+        start = TimeBlock(start_time=StartTime(time=dt.time(8, 0)), end_time=EndTime(time=dt.time(8, 0)))
         for time in meeting_times:
             instructors = list(time.section.instructors.all())
             instructors = [instructor.name for instructor in instructors]
 
-            room_courses[f'{room.number},{time.time_block}'] = [time.section.__str__(), instructors]
+            time_block = time.time_block
+            room_courses[f'{room.number},{time_block}'] = [time.section.__str__(), instructors]
 
             # add occupied time to room_times[room.number][0]
-            room_times[room.number][0].append(time.time_block)
+            room_times[room.number][0].append(time_block)
 
-            # add open time to room_times[room.number][1]
-            if type(start) == RUempty.models.StartTime:
-                time_diff = datetime.datetime.combine(date.min, time.time_block.start_time.time) - \
-                            datetime.datetime.combine(date.min, start.time)
-            else:
-                time_diff = datetime.datetime.combine(date.min, time.time_block.start_time.time) - \
-                            datetime.datetime.combine(date.min, start.time_block.end_time.time)
-            if time_diff > datetime.timedelta(0, 0, 0, 0, 30):
-                if type(start) == RUempty.models.StartTime:
-                    room_times[room.number][1].append(f"{start.stime} -> {time.time_block.start_time.stime}")
-                else:
-                    room_times[room.number][1].append(f"{start.time_block.end_time.stime}"
-                                                      f" -> {time.time_block.start_time.stime}")
-            start = time
-        closing = EndTime.objects.get(time=datetime.time(23, 00))
+            # if the time between occupied time blocks > 30 minutes, add open time
+            next_start_time = dt.datetime.combine(date.min, time_block.start_time.time)
+            time_diff = next_start_time - dt.datetime.combine(date.min, start.end_time.time)
+            if time_diff > dt.timedelta(0, 0, 0, 0, 30):
+                open_time = TimeBlock(start_time=StartTime(time=start.end_time.time),
+                                      end_time=EndTime(time=time_block.start_time.time))
+                room_times[room.number][1].append(open_time)
+
+            start = time_block
+
+        closing_time = EndTime.objects.get(time=dt.time(23, 00)).time
         if len(meeting_times) > 0:
-            last_meeting_time = meeting_times[-1]
-            time_diff = datetime.datetime.combine(date.min, closing.time) - \
-                        datetime.datetime.combine(date.min, last_meeting_time.time_block.end_time.time)
-            if time_diff > datetime.timedelta(0, 0, 0, 0, 30):
-                room_times[room.number][1].append(f"{last_meeting_time.time_block.end_time.stime} -> {closing.stime}")
+            last_meeting_time = meeting_times[-1].time_block.end_time.time
+
+            time_diff = dt.datetime.combine(date.min, closing_time) - dt.datetime.combine(date.min, last_meeting_time)
+            if time_diff > dt.timedelta(0, 0, 0, 0, 30):
+                open_time = TimeBlock(start_time=StartTime(time=last_meeting_time), end_time=EndTime(time=closing_time))
+                room_times[room.number][1].append(open_time)
 
     return render(request, "rooms.html", {
         "campus": request.POST["campus"],
@@ -156,18 +159,3 @@ def get_buildings(request, campus):
     buildings = [building.name for building in buildings]
     buildings.remove("None")
     return JsonResponse({"buildings": buildings}, status=200)
-
-
-def get_classes(request):
-    """
-    get a json object
-    {
-    "day":...
-    "campus":...
-    "building":...
-    "101": times
-    "102": times
-    ...
-    """
-    return JsonResponse({"data": "wassup"}, status=200)
-

@@ -83,7 +83,7 @@ function loadCourses() {
     let roomNumber = property.split(",")[0];
     let startTime = property.split(",")[1].split(" -> ")[0]
     let endTime = property.split(",")[1].split(" -> ")[1]
-    console.log(roomCourses[property]);
+    // console.log(roomCourses[property]);
     
     let room = document.querySelector(`.room-${roomNumber}`);
     let times = room.querySelectorAll('.occupied-time-time');
