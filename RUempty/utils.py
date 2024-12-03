@@ -23,91 +23,53 @@ def convert24hour(start, end):
 
 def save_time(start_s, end_s):
     if start_s is None or end_s is None:
-        return
-    start_s, end_s = convert24hour(start_s, end_s)
+        start_s = "0000"
+        end_s = "0000"
+    else:
+        start_s, end_s = convert24hour(start_s, end_s)
     start_t = datetime.time(int(start_s[:2]), int(start_s[2:]))
     end_t = datetime.time(int(end_s[:2]), int(end_s[2:]))
-    if end_t > start_t:
-        try:
-            start = StartTime(time=start_t)
-            start.save()
-        except django.db.utils.IntegrityError:
-            start = StartTime.objects.get(time=start_t)
-        try:
-            end = EndTime(time=end_t)
-            end.save()
-        except django.db.utils.IntegrityError:
-            end = EndTime.objects.get(time=end_t)
-        try:
-            block = TimeBlock(start_time=start, end_time=end)
-            block.save()
-        except django.db.utils.IntegrityError:
-            return
-        print("successfully saved time")
+    start, _ = StartTime.objects.get_or_create(time=start_t)
+    end, _ = EndTime.objects.get_or_create(time=end_t)
+    TimeBlock.objects.get_or_create(start_time=start, end_time=end)
 
 
 def save_location(time):
     campus_name, building_code, room_number = set_location(time)
-    try:
-        campus = Campus(name=campus_name)
-        campus.save()
-    except django.db.utils.IntegrityError:
-        campus = Campus.objects.get(name=campus_name)
-    try:
-        building = Building(name=building_code, campus=campus)
-        building.save()
-    except django.db.utils.IntegrityError:
-        building = Building.objects.get(name=building_code, campus=campus)
-    try:
-        room = Room(building=building, number=room_number)
-        room.save()
-        print("successfully saved room")
-    except django.db.utils.IntegrityError:
-        pass
+    campus, _ = Campus.objects.get_or_create(name=campus_name)
+    building, _ = Building.objects.get_or_create(name=building_code, campus=campus)
+    Room.objects.get_or_create(building=building, number=room_number)
 
 
 def save_instructor(section_instructors):
     for i in section_instructors:
         if i is None:
             continue
-        try:
-            instructor = Instructor(name=i["name"])
-            instructor.save()
-        except django.db.utils.IntegrityError:
-            pass
+        Instructor.objects.get_or_create(name=i["name"])
 
 
-def save_course(course, subject):
-    course_number = course["courseNumber"]
+def save_subject(subject):
+    Subject.objects.get_or_create(id=subject)
+
+
+def save_course(course, subject, semester):
     subj = Subject.objects.get(id=subject)
+    course_number = course["courseNumber"]
     course_title = course["title"]
     if course["credits"] is None:
         course_credits = 0
     else:
         course_credits = int(course["credits"])
-    course_desc = course["courseDescription"]
-    if course_desc is None or course_desc == "":
-        course_desc = "None"
-    new_course = Course(subject=subj, number=course_number, title=course_title, credits=course_credits)
 
-    new_course.save()
+    Course.objects.get_or_create(subject=subj, number=course_number, title=course_title, credits=course_credits,
+                    semester=semester)
 
 
-def save_meeting_time(time, course_number, subject, section_number):
+def save_meeting_time(time, course_number, subject, section_number, semester, course_title):
     campus_name, building_code, room_number = set_location(time)
     campus = Campus.objects.get(name=campus_name)
-    try:
-        building = Building.objects.get(name=building_code, campus=campus)
-    except Building.DoesNotExist:
-        print(campus_name, building_code)
-        building = Building(name=building_code, campus=campus)
-        building.save()
-    try:
-        room = Room.objects.get(building=building, number=room_number)
-    except Room.DoesNotExist:
-        print(campus_name, building_code, room_number)
-        room = Room(building=building, number=room_number)
-        room.save()
+    building, _ = Building.objects.get_or_create(name=building_code, campus=campus)
+    room, _ = Room.objects.get_or_create(building=building, number=room_number)
 
     start_s, end_s = convert24hour(time["startTime"], time["endTime"])
     if start_s is None or end_s is None:
@@ -123,37 +85,22 @@ def save_meeting_time(time, course_number, subject, section_number):
     if day is None:
         day = "None"
 
-    try:
-        section = Section.objects.get(section_number=section_number, course__number=course_number, course__subject=subject)
-    except Section.DoesNotExist:
-        print(section_number, course_number, subject)
-        exit()
-        section = Section.objects.get(section_number=section_number, course__number=course_number, course__subject=subject)
-    try:
-        meeting_time = MeetingTime(day=day, time_block=block, room=room, section=section)
-        meeting_time.save()
-    except django.db.utils.IntegrityError:
-        pass
+    section, _ = Section.objects.get_or_create(section_number=section_number, course__number=course_number,
+                                  course__subject=subject, course__semester=semester, course__title=course_title)
+
+    meeting, _ = MeetingTime.objects.get_or_create(day=day, time_block=block, room=room, section=section,
+                                                   section__course__semester=semester)
 
 
-def save_section(course_number, subject, section_number, section_instructors):
+def save_section(course_number, subject, section_number, section_instructors, course_title):
     subj = Subject.objects.get(id=subject)
-    course = Course.objects.get(subject=subj, number=course_number)
-    try:
-        section = Section.objects.get(course=course, section_number=section_number)
-    except Section.DoesNotExist:
-        section = Section(course=course, section_number=section_number)
-        section.save()
+    course = Course.objects.get(subject=subj, number=course_number, title=course_title)
+
+    section, _ = Section.objects.get_or_create(course=course, section_number=section_number)
 
     for i in section_instructors:
-        try:
-            instructor = Instructor.objects.get(name=i["name"])
-            section.instructors.add(instructor)
-        except Instructor.DoesNotExist:
-            temp = {"name": i["name"]}
-            save_instructor([temp])
-            instructor = Instructor.objects.get(name=i["name"])
-            section.instructors.add(instructor)
+        instructor, _ = Instructor.objects.get_or_create(name=i["name"])
+        section.instructors.add(instructor)
 
 
 def set_location(time):

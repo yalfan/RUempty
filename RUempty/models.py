@@ -92,10 +92,10 @@ class Course(models.Model):
         return f'{self.subject}:{self.number}'
 
     class Meta:
-        unique_together = ('subject', 'number')
+        unique_together = ('subject', 'number', 'title')
 
     def __str__(self):
-        return f"{self.subject}:{self.number}"
+        return f"{self.title} - ({self.subject}:{self.number})"
 
 
 class Section(models.Model):
@@ -116,17 +116,17 @@ class MeetingTime(models.Model):
     time_block = models.ForeignKey(TimeBlock, on_delete=models.CASCADE, default=None)
     day = models.CharField(max_length=4)
     room = models.ForeignKey(Room, on_delete=models.CASCADE, default=None)
-    semester = models.IntegerField(default=92023)
+    # semester = models.IntegerField(default=92023)
 
     @property
     def location(self):
         return f"{self.room.building.campus.name}, {self.room.building.name}-{self.room.number}"
 
     class Meta:
-        unique_together = ('time_block', 'day', 'room')
+        unique_together = ('time_block', 'day', 'room', 'section')
 
     def __str__(self):
         return f"{self.day}: ({self.room.building.campus.name} {self.room.building.name}-{self.room.number}) from " \
-               f"{self.time_block.__str__()}"
+               f"{str(self.time_block)}"
 
 

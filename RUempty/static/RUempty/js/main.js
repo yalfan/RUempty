@@ -90,7 +90,8 @@ function updateBuildings() {
       buildingSelectForm.appendChild(new Option("Please choose a building", "Please choose a building"))
       for (let building in buildings) {
         let newBuilding = new Option(buildings[building], buildings[building]);
-        buildingSelectForm.appendChild(newBuilding);
+        if (buildings[building] !== "None")
+            buildingSelectForm.appendChild(newBuilding);
       }
     })
     .then(() => {

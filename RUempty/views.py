@@ -1,18 +1,11 @@
 import json
 import requests
 import datetime as dt
-from datetime import date, datetime
+from datetime import date
 
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.db import IntegrityError
-from django.forms import model_to_dict
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
-from django.core import serializers
-from django.views.decorators.csrf import csrf_exempt
 from django import forms
 
 from .models import *
@@ -62,34 +55,45 @@ def index(request):
 
 
 def update_db(request):
+    # print(type(request), request)
     if not request.user.is_superuser:
         return HttpResponseRedirect(reverse("index"))
     subject = 10
-    semester = 92023
-    room_nums = []
+    # semester = 12023
+    # subject = 198
+    semester = 92024
     while subject <= 991:
+        # while subject < 199:
         if len(str(subject)) == 2:
             subject = f"0{subject}"
-        url = f"http://sis.rutgers.edu/oldsoc/courses.json?subject={subject}&semester={semester}&campus=NB&level=UG"
+        # https://sis.rutgers.edu/oldsoc/courses.json?subject=090&semester=92024&campus=NB&level=UG
+        url = f"https://sis.rutgers.edu/oldsoc/courses.json?subject={subject}&semester={semester}&campus=NB&level=UG"
         response = requests.get(url)
         response = json.loads(response.content.decode('utf-8', 'replace'))
         if len(response) == 0:
             subject = int(subject) + 1
             continue
         subject = str(subject)
+        # print(f'Subject: {subject}')
+        save_subject(subject)
         for course in response:
             sections = course["sections"]
-            # save_course(course, subject)
+            # print(f'Course: {course["title"]} ({course["courseNumber"]})')
+            save_course(course, subject, semester)
             for section in sections:
                 meeting_times = section["meetingTimes"]
-                # section_instructors = section["instructors"]
-                # save_section(course["courseNumber"], subject, section["number"], section_instructors)
+                section_instructors = section["instructors"]
+                # print(f'Meeting Times: {meeting_times}')
+                # print(f'Instructors: {section_instructors}')
+                save_section(course["courseNumber"], subject, section["number"], section_instructors, course["title"])
                 for time in meeting_times:
-                    # save_location(time)
-                    # save_time((time["startTime"], time["endTime"]))
-                    # save_meeting_time(time, course["courseNumber"], subject, section["number"])
-                    if time["buildingCode"] == "ARC":
-                        print(time["buildingCode"], time["roomNumber"])
+                    # if time["startTime"] is not None:
+                        # if time["startTime"][0] == "1" and time["startTime"][1] == "1":
+                        # print(f'Time: {time["startTime"], time["endTime"], time["pmCode"]}')
+                        # print(f'Converted Time: {convert24hour(time["startTime"], time["endTime"])}')
+                    save_location(time)
+                    save_time(time["startTime"], time["endTime"])
+                    save_meeting_time(time, course["courseNumber"], subject, section["number"], semester, course["title"])
         subject = int(subject) + 1
 
     return JsonResponse({"success": "succeeded"}, status=200)
@@ -111,6 +115,13 @@ def rooms(request):
                                                         room=room, day=day))
         meeting_times.sort(key=lambda time: time.time_block.start_time.time)
 
+        temp = []
+        for time in meeting_times:
+            if time.time_block not in [t.time_block for t in temp]:
+                temp.append(time)
+
+        meeting_times = temp
+
         # room_times[room #][0] = occupied times
         # room_times[room #][1] = open times
         room_times[room.number] = [[], []]
@@ -121,7 +132,7 @@ def rooms(request):
             instructors = [instructor.name for instructor in instructors]
 
             time_block = time.time_block
-            room_courses[f'{room.number},{time_block}'] = [time.section.__str__(), instructors]
+            room_courses[f'{room.number},{time_block}'] = [str(time.section), instructors]
 
             # add occupied time to room_times[room.number][0]
             room_times[room.number][0].append(time_block)
@@ -136,7 +147,7 @@ def rooms(request):
 
             start = time_block
 
-        closing_time = EndTime.objects.get(time=dt.time(23, 00)).time
+        closing_time = EndTime.objects.get_or_create(time=dt.time(23, 00))[0].time
         if len(meeting_times) > 0:
             last_meeting_time = meeting_times[-1].time_block.end_time.time
 
@@ -157,5 +168,5 @@ def rooms(request):
 def get_buildings(request, campus):
     buildings = list(Building.objects.filter(campus__name=campus.upper()))
     buildings = [building.name for building in buildings]
-    buildings.remove("None")
+    # buildings.remove("None")
     return JsonResponse({"buildings": buildings}, status=200)
