@@ -99,14 +99,5 @@ function loadCourses() {
       }
     })
   }
-  // let rooms = document.querySelectorAll('.room-card');
-  // rooms.forEach(room => {
-  //   let roomNumber = room.classList[room.classList.length-1].split("-")[1];
-  //   let times = room.querySelectorAll('.occupied-time-time');
-  //   console.log(times);
-  //   times.forEach(time => {
-  //     console.log(`Room: ${roomNumber}, Occupied at: ${time.textContent}`)
-  //   })
-  // })
 }
 
