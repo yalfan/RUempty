@@ -81,6 +81,8 @@ def update_db(request):
             # print(f'Course: {course["title"]} ({course["courseNumber"]})')
             save_course(course, subject, semester)
             for section in sections:
+                if section["printed"] == "N":
+                    continue
                 meeting_times = section["meetingTimes"]
                 section_instructors = section["instructors"]
                 # print(f'Meeting Times: {meeting_times}')
