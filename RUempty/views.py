@@ -58,10 +58,10 @@ def update_db(request):
     # print(type(request), request)
     if not request.user.is_superuser:
         return HttpResponseRedirect(reverse("index"))
-    subject = 10
+    subject = 1
     # semester = 12023
     # subject = 198
-    semester = 92024
+    semester = 12025
     while subject <= 991:
         # while subject < 199:
         if len(str(subject)) == 2:
@@ -77,17 +77,21 @@ def update_db(request):
         # print(f'Subject: {subject}')
         save_subject(subject)
         for course in response:
-            sections = course["sections"]
-            # print(f'Course: {course["title"]} ({course["courseNumber"]})')
-            save_course(course, subject, semester)
+            sections = [sec for sec in course["sections"] if sec["printed"] != "N"]
+
+            print(f'Course: {course["title"]} ({subject}:{course["courseNumber"]})')
+            if len(sections) > 0:
+                save_course(course, subject, semester)
+            else:
+                continue
+
             for section in sections:
-                if section["printed"] == "N":
-                    continue
                 meeting_times = section["meetingTimes"]
                 section_instructors = section["instructors"]
                 # print(f'Meeting Times: {meeting_times}')
                 # print(f'Instructors: {section_instructors}')
-                save_section(course["courseNumber"], subject, section["number"], section_instructors, course["title"])
+                course_title = course["title"] if not course["expandedTitle"] else course["expandedTitle"]
+                save_section(course["courseNumber"], subject, section["number"], section_instructors, course_title)
                 for time in meeting_times:
                     # if time["startTime"] is not None:
                         # if time["startTime"][0] == "1" and time["startTime"][1] == "1":
@@ -95,7 +99,7 @@ def update_db(request):
                         # print(f'Converted Time: {convert24hour(time["startTime"], time["endTime"])}')
                     save_location(time)
                     save_time(time["startTime"], time["endTime"])
-                    save_meeting_time(time, course["courseNumber"], subject, section["number"], semester, course["title"])
+                    save_meeting_time(time, course["courseNumber"], subject, section["number"], semester, course_title)
         subject = int(subject) + 1
 
     return JsonResponse({"success": "succeeded"}, status=200)

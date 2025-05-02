@@ -1,4 +1,5 @@
 import datetime
+import sqlite3
 
 import django.db.utils
 
@@ -55,14 +56,16 @@ def save_subject(subject):
 def save_course(course, subject, semester):
     subj = Subject.objects.get(id=subject)
     course_number = course["courseNumber"]
-    course_title = course["title"]
+    course_title = course["title"] if not course["expandedTitle"] else course["expandedTitle"]
     if course["credits"] is None:
         course_credits = 0
     else:
         course_credits = int(course["credits"])
 
+    print(subj, course_number, course_title, course_credits, semester)
     Course.objects.get_or_create(subject=subj, number=course_number, title=course_title, credits=course_credits,
-                    semester=semester)
+                semester=semester)
+
 
 
 def save_meeting_time(time, course_number, subject, section_number, semester, course_title):

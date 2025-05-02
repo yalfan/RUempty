@@ -15,10 +15,10 @@
                 </div>
                 <ul class="list-group times-list">
                     {% if times.0|length == 0 %}
-                        <li class="list-group-item">Open all day!</li>
+                        <li class="list-group-item" style="color: #28A745;">Open all day!</li>
                     {% else %}
-                        <li class="list-group-item open-time-item" style="display: block;"><b>Open times</b></li>
-                        <li class="list-group-item occupied-time-item" style="display: none;"><b>Occupied times</b></li>
+                        <li class="list-group-item open-time-item" style="display: block;"><b style="color: #28A745;">Open times</b></li>
+                        <li class="list-group-item occupied-time-item" style="display: none;"><b style="color: #DC3545;">Occupied times</b></li>
                     {% endif %}
 
                     {# Adds all occupied times and hides them #}
